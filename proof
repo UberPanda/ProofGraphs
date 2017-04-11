@@ -1,0 +1,11 @@
+---- Proof ----  
+
+Asynch :
+
+Non terminal path : A moves toward B (fair scheduler)
+                    No exits
+If Gathering is complete : B1 or B2 will be reached
+                           Leads to F7 or F5
+                           Which leads to B1 or B2 
+
+Asynch is a winning subset of configurations
