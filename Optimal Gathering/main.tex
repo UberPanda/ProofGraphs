@@ -9,6 +9,8 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{amsthm}
+\usepackage{enumitem}
+
 \newtheorem{Lemma}{Lemma}
 \newtheorem{Theorem}{Theorem}
 
@@ -26,15 +28,130 @@
 
 \section{Introduction}
 
+\section{Problem Definition}
+
+
+The gathering problem for two robots is achieved in a self-stabilizing fashion in finite time if and only if, for any starting position, phase and colour, after a finite number of activations, both robots are located at the same coordinates.
+
 \section{Model}
 
-\begin{figure}[htb]
+
+
+We consider the following model for two robots : 
+Both robots execute cycles of three phases : LOOK, COMPUTE AND MOVE.
+We assume the LOOK phase is instantaneous, and that the COMPUTE and MOVE phases have an unknown, but finite duration.
+\\
+Robots are anonymous, meaning there are no way of distinguishing them. However, for the sake of practicality, we will call them A and B.
+\\
+Both robots are also fitted with lights which can take one of two colours, called black and white.
+\\
+During its LOOK phase, a robot sees the colour of the other robot's light.
+\\
+A robot is able to change the colour of its own light at the end of its COMPUTE phase, i.e. at the moment corresponding to the activation following its COMPUTE phase activation
+
+We consider a fair, asynchronous scheduler. 
+At every instant, the scheduler can activate either A, B or both.
+
+
+
+We call $\delta$ the minimum distance a robot can travel through a single MOVE phase if its target is farther than delta. If the target of the robot is closer than $\delta$ when the robot activates its MOVE phase, then we assume the robot reaches its target.
+
+In other words, if a robot has a target at a distance $x$, we assume that, at the end of its move phase, the robot has moved a distance in $[min(\delta,x),x]$
+\section{Algorithm :}
+
+We consider the following algorithm :
+
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\linewidth]{Algorithm.png}
 	\caption{Algorithm}
 \end{figure}
 
+\begin{Theorem}
+Algorithm solves the gathering problem for two robots in a self-stabilizing fashion in finite time for the ASYNC model.
+\end{Theorem}
+
 \section{Proof :}
-We call $\Delta$ the maximum distance a robot can travel through a single MOVE phase and $\delta$ the minimum distance.
+To prove this algorithm for the ASYNC model, we need to consider every possible configuration of the algorithm.
+\\
+We consider the different types of phases that can be reached by the algorithm : 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\linewidth]{Cases.png}
+	\caption{Configurations}
+\end{figure}
+
+\begin{itemize}
+\item W : Wait
+\item C2H : Compute to Half
+\item C2O : Compute to Other
+\item M2O : Move to Other
+\item C2W : Compute to White
+\item C2B : Compute to Black
+\item M2H : Move to Half
+\item C2N : Compute to Nothing
+\end{itemize}
+
+Since robots are identical, we only need to consider half of the possible configurations. 
+
+The ones with a name will be used as targets in the graphs. 
+
+The ones in yellow pose an interesting problem :
+In those cases, the simultaneous activation of A and B by the scheduler is not perfectly defined. Indeed, activating A then B or B then A does not lead to the same configuration. In those cases, we need to consider two different simultaneous activations.
+
+
+We divide the complete set of configurations in six subsets :
+
+\begin{enumerate}[label=(\alph*)]
+\item SYM : configurations where A and B are in, or can reach, identical states.
+\item ASYM : configurations where A and B are differentiated into a black robot and a white robot and have no way of going back to being identical.\\
+
+These two subsets cover the normal operation of the algorithm.
+
+\item FAULTY 1 : faulty configurations after a white to black de-synchronisation.
+\item FAULTY 2 : faulty configurations after a black to white de-synchronisation.\\
+
+These two subsets cover faulty behaviour allowed by the algorithm.
+
+\item Illegal : configurations that cannot be reached by the algorithm but need to be taken into account to prove self-stabilization
+\item Gathered : Specific configurations that can only be reached if the gathering is complete.
+
+\end{enumerate}
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.4]{SYM.png}
+	\caption{SYM configurations}
+\end{figure}
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.4]{ASYM.png}
+	\caption{ASYM configurations}
+\end{figure}
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.4]{Faulty_1.png}
+	\caption{FAULTY 1 configurations}
+\end{figure}
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.4]{Faulty_2.png}
+	\caption{FAULTY 2 configurations}
+\end{figure}
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.4]{Illegal.png}
+	\caption{Illegal configurations}
+\end{figure}
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.4]{Gathered.png}
+	\caption{Gathered configurations}
+\end{figure}
 
 \end{document}
