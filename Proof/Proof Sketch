@@ -70,3 +70,17 @@ Non terminal path leads to either FAULTY 1
 If gathering is complete : no change in behavior
 
 Illegal is a winning subset of configurations
+
+
+Remarques : 
+
+Commencer par les états illegaux
+FSYNCH : SYM 
+ASYNCH : ASYM
+Illegal : NA
+Finish : Gathered
+
+Structure en arbre 
+ASYM
+FAULTY 1
+FAULTY 2 ==> lemme SYM
