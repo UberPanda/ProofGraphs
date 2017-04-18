@@ -28,6 +28,8 @@
 
 \section{Introduction}
 
+The main difficulty of a two robots gathering in ASYNC is the fact that a FSYNC behaviour requires both robots to move towards the middle point, whereas purely asynchronous behaviour requires a robot moving towards the other and the other not moving. 
+
 \section{Problem Definition}
 
 
@@ -35,20 +37,21 @@ The gathering problem for two robots is achieved in a self-stabilizing fashion i
 
 \section{Model}
 
-
+We consider a system of two robots. Those robots are mobile in the plane, modelled as the R2 space.
 
 We consider the following model for two robots : 
 Both robots execute cycles of three phases : LOOK, COMPUTE AND MOVE.
 We assume the LOOK phase is instantaneous, and that the COMPUTE and MOVE phases have an unknown, but finite duration.
 \\
-Robots are anonymous, meaning there are no way of distinguishing them. However, for the sake of practicality, we will call them A and B.
+Robots are anonymous, meaning there are no way of distinguishing them. However, for the sake of practicality, they are called A and B. Note that switching their name during the proof has no consequence on its correctness.
 \\
 Both robots are also fitted with lights which can take one of two colours, called black and white.
 \\
-During its LOOK phase, a robot sees the colour of the other robot's light.
+During its LOOK phase, robot A takes a snapshot of both robot B's colour and position.
 \\
 A robot is able to change the colour of its own light at the end of its COMPUTE phase, i.e. at the moment corresponding to the activation following its COMPUTE phase activation
-
+\\
+If it is not executing the LCM cycle, a robot is WAITING.
 We consider a fair, asynchronous scheduler. 
 At every instant, the scheduler can activate either A, B or both.
 
@@ -68,10 +71,13 @@ We consider the following algorithm :
 \end{figure}
 
 \begin{Theorem}
-Algorithm solves the gathering problem for two robots in a self-stabilizing fashion in finite time for the ASYNC model.
+The algorithm solves the gathering problem for two robots in a self-stabilizing fashion in finite time for the ASYNC model.
 \end{Theorem}
 
-\section{Proof :}
+\section{Proving the algorithm :}
+
+\subsection{Introduction}
+
 To prove this algorithm for the ASYNC model, we need to consider every possible configuration of the algorithm.
 \\
 We consider the different types of phases that can be reached by the algorithm : 
@@ -92,11 +98,11 @@ We consider the different types of phases that can be reached by the algorithm :
 \item C2N : Compute to Nothing
 \end{itemize}
 
-Since robots are identical, we only need to consider half of the possible configurations. 
+Since robots are anonymous, we only need to consider half of the possible configurations. 
 
-The ones with a name will be used as targets in the graphs. 
+The named configurations (i.e. A1, F4 ...) will be used as targets in the graphs. 
 
-The ones in yellow pose an interesting problem :
+The configurations underlined in yellow pose an interesting problem :
 In those cases, the simultaneous activation of A and B by the scheduler is not perfectly defined. Indeed, activating A then B or B then A does not lead to the same configuration. In those cases, we need to consider two different simultaneous activations.
 
 
@@ -115,43 +121,116 @@ These two subsets cover faulty behaviour allowed by the algorithm.
 
 \item Illegal : configurations that cannot be reached by the algorithm but need to be taken into account to prove self-stabilization
 \item Gathered : Specific configurations that can only be reached if the gathering is complete.
+  
 
 \end{enumerate}
 
+
+Each subset is drawn as a graph of its configurations and the possible exits. The possible entrances of both FAULTY 1 and FAULTY 2 are also represented for better readability.
+
+Each graph is divided in two parts : the top part, called nominal behaviour and a bottom part called terminal behaviour. 
+
+The behaviour of the algorithm is nominal when a robots are not gathered. Certain nodes, represented in the bottom part, will change their behaviour if the gathering is achieved during their activation. This is the case when a white robot activates its look phase and perceives the other robot and itself on the same coordinates.
+
+
+
+\pagebreak
 \begin{figure}[htb]
 	\centering
-	\includegraphics[scale=0.4]{SYM.png}
+	\includegraphics[scale=0.44]{SYM.png}
 	\caption{SYM configurations}
 \end{figure}
+\pagebreak
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[scale=0.4]{ASYM.png}
+	\includegraphics[scale=0.7]{ASYM.png}
 	\caption{ASYM configurations}
 \end{figure}
+\pagebreak
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[scale=0.4]{Faulty_1.png}
+	\includegraphics[scale=0.6]{Faulty_1.png}
 	\caption{FAULTY 1 configurations}
 \end{figure}
+\pagebreak
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[scale=0.4]{Faulty_2.png}
+	\includegraphics[scale=0.6]{Faulty_2.png}
 	\caption{FAULTY 2 configurations}
 \end{figure}
+\pagebreak
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[scale=0.4]{Illegal.png}
+	\includegraphics[scale=0.6]{Illegal.png}
 	\caption{Illegal configurations}
 \end{figure}
+\pagebreak
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[scale=0.4]{Gathered.png}
+	\includegraphics[scale=0.5]{Gathered.png}
 	\caption{Gathered configurations}
 \end{figure}
+\pagebreak
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.7]{Legend.png}
+	\caption{Graph legend}
+\end{figure}
+\pagebreak
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.6]{Legend_2.png}
+	\caption{Graph Legend}
+\end{figure}
+\pagebreak
+
+\subsection{Proof}
+
+To prove the correctness of the algorithm, we need to prove that : 
+\begin{itemize}
+\item every nominal behaviour leads to a terminal phase
+\item every terminal phase leads to the gathering
+\end{itemize}
+
+\subsubsection{ASYM}
+
+The easiest subset of the configuration to prove is the ASYM subset. Indeed, as it has no possible exits. We can easily prove that, once the system is in a ASYM configuration, fair activations of the robots will lead to :
+
+\begin{itemize}
+\item A moving towards B
+\item B not moving
+\end{itemize}
+
+in their nominal behaviour.
+It is therefore easily proven that the nominal behaviour leads to both robots sharing the same coordinates in a finite number of steps.
+Once it is done, the following activation of robot A leads to either the B1 or B2 configuration. The following activation of A then leads to either F5 or F7, which, in turn, either leads to B1 or B2. The system, is now stuck in a no-movement loop.
+
+Therefore, the ASYM subset of configuration is a valid subset.
+
+\subsubsection{FAULTY 1}
+
+The first thing to notice in the FAULTY 1 subset is that, in nominal behaviour, the system can only exit the subset by going to the ASYM subset, which we have proven to be a valid subset.
+It is also worth noticing that, while three cycles exist in this subset, none of them can actually be kept under the fair scheduler assumption, i.e. the require one robot to never be activated. And, while it is possible to switch from the first cycle to the second, and from the second to the third, breakage of the third cycle leads the system to the ASYM subset.
+
+Therefore, the nominal behaviour of FAULTY 1 is valid.
+
+Note that the only configuration of FAULTY 1 whose behaviour is modified by achieving the gathering is C1. C1 can then lead to either B1 and ASYM, or F5 and ASYM. Finally, if only the white robot is activated, it is possible to cycle between C1 and F8. However, the fair scheduler assumption requires this cycle to be broken and the system to move to the ASYM subset.
+
+
+
+\subsubsection{Self-Stabilization}
+
+To prove the algorithm works in a self-stabilizing fashion, we need to prove that every possible starting configuration leads to a valid gathering. To do so, we need to prove two things : 
+
+\begin{itemize}
+\item 
+\end{itemize}
 
 \end{document}
