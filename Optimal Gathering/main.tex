@@ -17,7 +17,7 @@
 
 \title{Optimally Gathering Two Robots}
 \author{Some smart people}
-\date{March 2017}
+\date{April 2017}
 
 \graphicspath{{../png/}}
 
@@ -28,7 +28,6 @@
 
 \section{Introduction}
 
-The main difficulty of a two robots gathering in ASYNC is the fact that a FSYNC behaviour requires both robots to move towards the middle point, whereas purely asynchronous behaviour requires a robot moving towards the other and the other not moving. 
 
 \section{Problem Definition}
 
@@ -37,17 +36,17 @@ The gathering problem for two robots is achieved in a self-stabilizing fashion i
 
 \section{Model}
 
-We consider a system of two robots. Those robots are mobile in the plane, modelled as the R2 space.
+We consider a system of two robots. Those robots are mobile in the plane, modelled as the $\mathbb{R}_2$ space.
 
 We consider the following model for two robots : 
 Both robots execute cycles of three phases : LOOK, COMPUTE AND MOVE.
 We assume the LOOK phase is instantaneous, and that the COMPUTE and MOVE phases have an unknown, but finite duration.
 \\
-Robots are anonymous, meaning there are no way of distinguishing them. However, for the sake of practicality, they are called A and B. Note that switching their name during the proof has no consequence on its correctness.
+Robots are anonymous, meaning there are no fixed way of distinguishing them. However, for the sake of practicality, they are called A and B. Note that switching their name during the proof has no consequence on its correctness.
 \\
 Both robots are also fitted with lights which can take one of two colours, called black and white.
 \\
-During its LOOK phase, robot A takes a snapshot of both robot B's colour and position.
+During its LOOK phase, robot A takes a snapshot of both robot B's colour and position, relative to itself.
 \\
 A robot is able to change the colour of its own light at the end of its COMPUTE phase, i.e. at the moment corresponding to the activation following its COMPUTE phase activation
 \\
@@ -59,9 +58,17 @@ At every instant, the scheduler can activate either A, B or both.
 
 We call $\delta$ the minimum distance a robot can travel through a single MOVE phase if its target is farther than delta. If the target of the robot is closer than $\delta$ when the robot activates its MOVE phase, then we assume the robot reaches its target.
 
-In other words, if a robot has a target at a distance $x$, we assume that, at the end of its move phase, the robot has moved a distance in $[min(\delta,x),x]$
-\section{Algorithm :}
+In other words, if a robot has a target at a distance $x$, we assume that, at the end of its move phase, the robot has moved a distance in $[min(\delta,x),x]$. The exact position reached is determined by the adversary scheduler.
+\section{Proposed Algorithm :}
+\subsection{Problem}
+To solve the problem, a gathering algorithm needs to make sure of three things : 
 
+\begin{itemize}
+\item If the robots are synchronized, they need to move towards the middle point
+\item If the robots are not synchronized, one needs to move towards the other
+\item In that case, the other robot must not move (only necessary in ASYNC)
+\end{itemize}
+\subsection{Algorithm}
 We consider the following algorithm :
 
 \begin{figure}[H]
@@ -73,6 +80,17 @@ We consider the following algorithm :
 \begin{Theorem}
 The algorithm solves the gathering problem for two robots in a self-stabilizing fashion in finite time for the ASYNC model.
 \end{Theorem}
+
+\subsection{Principle}
+
+The principle of the algorithm is the following :
+
+If both robots A and B start in the same colour and are fully synchronized, they move along the white to black and black to white vertexes. In that case, the each move towards the middle point.
+
+If they get de-synchronized or start in different colours, the robot in black is forced to stay put while the robot in white moves towards it on the white to white vertex.
+
+This algorithm is quite trivial to prove for both the FSYNC and SSYNC model. However, proving the algorithm for the ASYNC model requires us to take into account what exactly happens during the de-synchronisation.
+
 
 \section{Proving the algorithm :}
 
@@ -89,44 +107,44 @@ We consider the different types of phases that can be reached by the algorithm :
 
 \begin{itemize}
 \item W : Wait
-\item C2H : Compute to Half
-\item C2O : Compute to Other
+\item C2H : Compute to Half (at the end of this compute phase, the robot switches its colour to black and moves towards the middle point)
+\item C2O : Compute to Other (at the end of this compute phase, the robot stays white and moves towards the other robot)
 \item M2O : Move to Other
-\item C2W : Compute to White
-\item C2B : Compute to Black
+\item C2W : Compute to White (compute phase that leads to no motion)
+\item C2B : Compute to Black (compute phase that leads to no motion)
 \item M2H : Move to Half
-\item C2N : Compute to Nothing
+\item C2N : Compute to Nothing (compute phase that leads to no motion)
 \end{itemize}
 
 Since robots are anonymous, we only need to consider half of the possible configurations. 
 
-The named configurations (i.e. A1, F4 ...) will be used as targets in the graphs. 
+The named configurations (i.e. A1, F4 ...) will be used as targets in the configuration graphs. 
 
-The configurations underlined in yellow pose an interesting problem :
+The configurations with yellow backgrounds pose an interesting problem :
 In those cases, the simultaneous activation of A and B by the scheduler is not perfectly defined. Indeed, activating A then B or B then A does not lead to the same configuration. In those cases, we need to consider two different simultaneous activations.
+\\
 
-
-We divide the complete set of configurations in six subsets :
+We then divide the complete set of configurations in six subsets :
 
 \begin{enumerate}[label=(\alph*)]
 \item SYM : configurations where A and B are in, or can reach, identical states.
-\item ASYM : configurations where A and B are differentiated into a black robot and a white robot and have no way of going back to being identical.\\
+\item ASYM : configurations where A and B are differentiated into a black robot and a white robot and have no way of going back to being identical.
 
 These two subsets cover the normal operation of the algorithm.
 
 \item FAULTY 1 : faulty configurations after a white to black de-synchronisation.
-\item FAULTY 2 : faulty configurations after a black to white de-synchronisation.\\
+\item FAULTY 2 : faulty configurations after a black to white de-synchronisation.
 
 These two subsets cover faulty behaviour allowed by the algorithm.
 
-\item Illegal : configurations that cannot be reached by the algorithm but need to be taken into account to prove self-stabilization
+\item Illegal : configurations that cannot be reached by the algorithm but need to be taken into account as possible starting configurations to prove self-stabilization
 \item Gathered : Specific configurations that can only be reached if the gathering is complete.
   
 
 \end{enumerate}
 
 
-Each subset is drawn as a graph of its configurations and the possible exits. The possible entrances of both FAULTY 1 and FAULTY 2 are also represented for better readability.
+Each subset is drawn as a graph of its configurations and the possible exits. Some entrances of FAULTY 1 and FAULTY 2 are also represented for better readability.
 
 Each graph is divided in two parts : the top part, called nominal behaviour and a bottom part called terminal behaviour. 
 
@@ -201,6 +219,8 @@ To prove the correctness of the algorithm, we need to prove that :
 
 \subsubsection{ASYM}
 
+ASYM is the subset that is reached after a successful de-synchronization of A and B where A and B are now differentiated into a white and a black robot.
+
 The easiest subset of the configuration to prove is the ASYM subset. Indeed, as it has no possible exits. We can easily prove that, once the system is in a ASYM configuration, fair activations of the robots will lead to :
 
 \begin{itemize}
@@ -215,6 +235,8 @@ Once it is done, the following activation of robot A leads to either the B1 or B
 Therefore, the ASYM subset of configuration is a valid subset.
 
 \subsubsection{FAULTY 1}
+The FAULTY 1 subset is reached with a white to black de-synchronization.
+It is then possible to have robot A moving towards the middle point and B moving towards A.
 
 The first thing to notice in the FAULTY 1 subset is that, in nominal behaviour, the system can only exit the subset by going to the ASYM subset, which we have proven to be a valid subset.
 It is also worth noticing that, while three cycles exist in this subset, none of them can actually be kept under the fair scheduler assumption, i.e. the require one robot to never be activated. And, while it is possible to switch from the first cycle to the second, and from the second to the third, breakage of the third cycle leads the system to the ASYM subset.
@@ -223,7 +245,75 @@ Therefore, the nominal behaviour of FAULTY 1 is valid.
 
 Note that the only configuration of FAULTY 1 whose behaviour is modified by achieving the gathering is C1. C1 can then lead to either B1 and ASYM, or F5 and ASYM. Finally, if only the white robot is activated, it is possible to cycle between C1 and F8. However, the fair scheduler assumption requires this cycle to be broken and the system to move to the ASYM subset.
 
+We can conclude that, despite being an abnormal subset, FAULTY 1 is merely a temporary subset, provided the scheduler is fair.
 
+\subsubsection{FAULTY 2}
+The FAULTY 2 subset is reached with a black to white de-synchronization.
+It is then possible to have robot A moving towards B and B targeting the middle point.
+
+FAULTY 2 poses quite a problem : It is possible to enter FAULTY 2 from A6 in the SYM subset. However, it is also possible to exit FAULTY 2 to A2 in SYM. This A2 configuration contains an abnormal target. Therefore, it is possible for a scheduler to create a FAULTY 2 $<->$ SYM cycle.
+
+We need to prove that this particular cycle does not threaten the gathering. To do so, we notice that, in order to keep this cycle running, we need to go through the A6 configuration, and then the A2 configuration.
+
+If we assume that, in the A6 configuration, we have :
+\begin{itemize}
+\item A, white, in position 0 with no target
+\item B, black, in position x with no target
+
+\end{itemize}
+
+Then it is possible to prove, by exploring every possible path, that when reaching A2  :
+
+\begin{itemize}
+\item A is in position $[min(\delta,x),x]$ with no target
+\item B is in position X with either $\dfrac{x}{2}$ or $[\dfrac{x}{2},x]$
+\end{itemize}
+
+Now, to go back to A6, the system needs to execute B's target. Also, A will target the middle point and execute this movement.
+This means that, when back to A6, the distance between A and B is now $[-\dfrac{x}{2},x-3\delta]$ which is less than x.
+
+While it is an abnormal state, FAULTY 2 cannot prevent A and B from moving closer to each other. If the distance is inferior to $\delta$, then at the end of D2, the gathering is achieved.
+
+The nominal behaviour of FAULTY 2 is valid.
+
+FAULTY 2 does not have a terminal behaviour. We can, however, note that in terminal behaviour, A2 cannot lead to A6 (proved in the SYM section). This means that the FAULTY cycle leads to the gathering, and is then broken when reaching A2.
+
+
+
+\subsubsection{SYM}
+The SYM subset is considered the normal starting starting subset (A and B waiting in white). It comprises the FSYNC states (A1 to A1 through simultaneous activations) and every state that can be reached by A1 and lead back to A1 (except through FAULTY 2).  
+
+In this subset, it is possible to exit through ASYM, FAULTY 1 FAULTY 2. It is also possible to cycle through SYM. This can either be done from A6 to A2, A7 to A5 or by cycling back to A1. In each case, cycling through SYM implies both robots targeting the middle point while not moving, and then both of them moving towards the middle point. Therefore, SYM nominal behaviour is valid.
+
+Achieving the gathering implies terminal behaviour for nodes A1, A2, A3, A4 and A6.
+
+\begin{itemize}
+\item A1 can lead to F1 which leads to A1 
+\item A1 can lead to F9 which leads to A1 
+
+\item A2 can lead to ASYM
+\item A2 can lead to F2 or F8 which leads to A2, FAULTY 1 or ASYM
+
+\item A3 can lead to F3 or F4 which leads to A3, A4 or A1
+\item A3 can lead to A4 
+
+\item A4 can lead to A1
+\item A4 can lead to F1 which leads to A1 
+\item A4 can lead to F4 which leads to A1 or A4
+
+\item A6 can lead to A1 
+\item A6 can lead to F1 which leads to A1 
+\item A6 can lead to F6 which leads to A1 or A6
+
+For one, it is clear that it is no longer possible to keep the SYM $<->$ FAULTY 2 loop, as neither A6 nor A2 can lead to their faulty targets any longer. Furthermore, Reaching A2 with an invalid target and after achieving the gathering now will lead to FAULTY 1 or ASYM, which are valid subsets. Looping around to A2 would, indeed, require an unfair scheduler.
+It is also clear that, once the gathering is complete, SYM can either loop without motion or lead to a valid subset. Therefore, SYM is a valid subset.
+
+\end{itemize}
+\subsubsection{Illegal}
+
+This subset covers configurations that are not possible to reach from normal behaviour. This is necessary to ensure self-stabilization.
+
+\subsubsection{Gathered}
 
 \subsubsection{Self-Stabilization}
 
@@ -232,5 +322,7 @@ To prove the algorithm works in a self-stabilizing fashion, we need to prove tha
 \begin{itemize}
 \item 
 \end{itemize}
+
+
 
 \end{document}
