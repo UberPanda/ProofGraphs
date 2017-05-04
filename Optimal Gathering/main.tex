@@ -266,13 +266,13 @@ Then it is possible to prove, by exploring every possible path, that when reachi
 
 \begin{itemize}
 \item A is in position $[min(\delta,x),x]$ with no target
-\item B is in position X with either $\dfrac{x}{2}$ or $[\dfrac{x}{2},x]$
+\item B is in position x with either $\dfrac{x}{2}$ or $[\dfrac{x}{2},x]$ as a target.
 \end{itemize}
 
 Now, to go back to A6, the system needs to execute B's target. Also, A will target the middle point and execute this movement.
 This means that, when back to A6, the distance between A and B is now $[-\dfrac{x}{2},x-3\delta]$ which is less than x.
 
-While it is an abnormal state, FAULTY 2 cannot prevent A and B from moving closer to each other. If the distance is inferior to $\delta$, then at the end of D2, the gathering is achieved.
+Thus, while it is an abnormal state, FAULTY 2 cannot prevent A and B from moving closer to each other. If the distance is inferior to $\delta$, then at the end of D2, the gathering is achieved.
 
 The nominal behaviour of FAULTY 2 is valid.
 
@@ -311,17 +311,33 @@ It is also clear that, once the gathering is complete, SYM can either loop witho
 \end{itemize}
 \subsubsection{Illegal}
 
-This subset covers configurations that are not possible to reach from normal behaviour. This is necessary to ensure self-stabilization.
+This subset covers configurations that are not possible to reach from normal behaviour. This is necessary to ensure self-stabilization. 
+We can quickly notice that no cycle exists within the illegal subset and that this subset needs to exit to either SYM or FAULTY 1.
+
+Therefore, this subset is valid.
 
 \subsubsection{Gathered}
+
+This subset has already been proven above.
 
 \subsubsection{Self-Stabilization}
 
 To prove the algorithm works in a self-stabilizing fashion, we need to prove that every possible starting configuration leads to a valid gathering. To do so, we need to prove two things : 
 
 \begin{itemize}
-\item 
+\item Starting from anywhere leads to gathering
+\item No false target can be kept indefinitely
 \end{itemize}
+
+This second hypotheses is necessary as we do not take the target into account in the configurations.
+
+We already proved that every subset of configurations is valid and leads to the gathering. 
+\\
+To prove that no target can be kept infinitely in the general execution, we only need to prove it for SYM and ASYM, as all other subsets eventually lead to either of them.
+\\
+This proof is quite trivial for ASYM, as it is a cycle of motion for the white robot.
+\\
+For SYM, we notice that cycling through the subset requires moving from the leftmost configurations (A1-2-9) to the rightmost configurations. this implies crossing the yellow configurations and, again, provided the scheduler is fair, activating both robots through their MOVE phase once. This implies that no target acquired before can be kept is the right part of the graph.
 
 
 
